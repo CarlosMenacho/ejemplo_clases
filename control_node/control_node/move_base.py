@@ -4,6 +4,7 @@ from geometry_msgs.msg import Twist
 
 
 class CmdVel(Node):
+
     def __init__(self):
         super().__init__('cmd_pub')
 
@@ -12,10 +13,12 @@ class CmdVel(Node):
 
     def publish_vel(self):
         msg = Twist()
-        msg.linear.x = float(0.1)
-        msg.angular.z = float(0.1)
+        msg.linear.x = float(0)
+        msg.linear.y = float(0.5)
+        msg.angular.z = float(0)
 
         self.pub.publish(msg)
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -25,7 +28,6 @@ def main(args=None):
     node.destroy_node()
     rclpy.shutdown()
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()
-
-

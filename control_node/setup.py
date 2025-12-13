@@ -8,7 +8,7 @@ setup(
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
-            ['resource/' + package_name]),
+         ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
     install_requires=['setuptools'],
@@ -24,7 +24,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            "control = control_node.move_base:main"
+            "control = control_node.move_base:main",
+            "get_odom = control_node.odom_callback:main",
         ],
     },
 )
