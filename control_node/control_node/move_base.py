@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import TwistStamped
 
 
 class CmdVel(Node):
@@ -8,14 +8,19 @@ class CmdVel(Node):
     def __init__(self):
         super().__init__('cmd_pub')
 
-        self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.pub = self.create_publisher(TwistStamped, '/cmd_vel', 10)
         self.timer = self.create_timer(0.1, self.publish_vel)
 
     def publish_vel(self):
-        msg = Twist()
-        msg.linear.x = float(0)
-        msg.linear.y = float(0.5)
-        msg.angular.z = float(0)
+        msg = TwistStamped()
+
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = 'base_link'
+
+        # Twist
+        msg.twist.linear.x = 0.5
+        msg.twist.linear.y = 0.0
+        msg.twist.angular.z = 0.0
 
         self.pub.publish(msg)
 
@@ -23,8 +28,7 @@ class CmdVel(Node):
 def main(args=None):
     rclpy.init(args=args)
     node = CmdVel()
-
-    rclpy.spin(node=node)
+    rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
 

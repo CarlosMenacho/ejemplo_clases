@@ -26,7 +26,8 @@ setup(
         'console_scripts': [
             "control = control_node.move_base:main",
             "get_odom = control_node.odom_callback:main",
-            "img_point = control_node.perception:main"
+            "img_point = control_node.perception:main",
+            "aruco_pose =control_node.aruco_pose:main"
         ],
     },
 )

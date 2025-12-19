@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, TwistStamped
 from cv_bridge import CvBridge
 
 import cv2
@@ -21,6 +21,10 @@ class ArucoDetector(Node):
         self.sub_img = self.create_subscription(Image, "/camera/image_raw",
                                                 self.img_callback, 10)
 
+        self.pub = self.create_publisher(TwistStamped, '/cmd_vel', 10)
+
+        self.k = 5
+
         self.center_img = None
 
     def img_callback(self, msg):
@@ -30,6 +34,7 @@ class ArucoDetector(Node):
         if self.center_img is None:
             height, width = cv_img.shape[:2]
             self.center_img = np.array([width / 2.0, height / 2.0])
+            self.img_width = width
             print(f"centro {self.center_img}")
 
         corners, ids, rej = cv2.aruco.detectMarkers(
@@ -40,15 +45,21 @@ class ArucoDetector(Node):
             markers_corners = corners[0][0]
             marker_center = np.mean(markers_corners, axis=0)
 
-            error = marker_center = self.center_img
+            error = (marker_center[0] - self.center_img[0]) / self.img_width
 
-            cv2.circle(cv_img, tuple(marker_center.astype(int)), 5,
-                       (0, 255, 0), -1)
+            p_out = self.k * error
 
-            center_msg = Point()
-            center_msg.x = float(marker_center[0])
-            center_msg.y = float(marker_center[1])
-            center_msg.z = 0.0
+            p_out = np.clip(p_out, -0.6, 0.6)
+
+            print(p_out)
+
+            msg = TwistStamped()
+            msg.header.stamp = self.get_clock().now().to_msg()
+            msg.header.frame_id = 'base_link'
+            msg.twist.linear.x = 0.0
+            msg.twist.angular.z = -p_out
+
+            self.pub.publish(msg)
 
         cv2.imshow("robot_vis", cv_img)
         cv2.waitKey(1)
